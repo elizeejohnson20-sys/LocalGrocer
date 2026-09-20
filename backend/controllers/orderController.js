@@ -1,11 +1,19 @@
 const Order = require('../models/Order')
 const Product = require('../models/Product')
+const User = require('../models/User')
+
+const {
+  sendOrderConfirmationEmail,
+} = require('../utils/email')
 
 async function createOrder(req, res) {
   try {
-    const { items, deliveryAddress } = req.body
+    const {
+      items,
+      deliveryAddress,
+    } = req.body
 
-    if (!items || items.length === 0) {
+    if (!Array.isArray(items) || items.length === 0) {
       return res.status(400).json({
         message: 'Order must contain at least one product',
       })
@@ -17,11 +25,62 @@ async function createOrder(req, res) {
       })
     }
 
-    const productIds = items.map((item) => item.productId)
+    const {
+      fullName,
+      phone,
+      address,
+      city,
+      pincode,
+    } = deliveryAddress
 
-    const products = await Product.find({
-      _id: { $in: productIds },
-    })
+    if (
+      !fullName?.trim() ||
+      !phone?.trim() ||
+      !address?.trim() ||
+      !city?.trim() ||
+      !pincode?.trim()
+    ) {
+      return res.status(400).json({
+        message: 'All delivery address fields are required',
+      })
+    }
+
+    if (!/^\d{10}$/.test(phone.trim())) {
+      return res.status(400).json({
+        message: 'Phone number must contain exactly 10 digits',
+      })
+    }
+
+    if (!/^\d{6}$/.test(pincode.trim())) {
+      return res.status(400).json({
+        message: 'Pincode must contain exactly 6 digits',
+      })
+    }
+
+    for (const item of items) {
+      if (!item.productId) {
+        return res.status(400).json({
+          message: 'Each order item must contain a productId',
+        })
+      }
+
+      if (
+        !Number.isInteger(item.quantity) ||
+        item.quantity < 1
+      ) {
+        return res.status(400).json({
+          message: 'Product quantity must be a positive integer',
+        })
+      }
+    }
+
+    const productIds = items.map(
+      (item) => item.productId
+    )
+const products = await Product.find({
+  _id: { $in: productIds },
+  isActive: true,
+})
 
     if (products.length !== items.length) {
       return res.status(400).json({
@@ -31,8 +90,15 @@ async function createOrder(req, res) {
 
     const orderItems = items.map((item) => {
       const product = products.find(
-        (product) => product._id.toString() === item.productId
+        (product) =>
+          product._id.toString() === item.productId
       )
+
+      if (!product) {
+        throw new Error(
+          `Product not found: ${item.productId}`
+        )
+      }
 
       return {
         productId: product._id,
@@ -44,7 +110,8 @@ async function createOrder(req, res) {
     })
 
     const totalAmount = orderItems.reduce(
-      (total, item) => total + item.price * item.quantity,
+      (total, item) =>
+        total + item.price * item.quantity,
       0
     )
 
@@ -55,12 +122,52 @@ async function createOrder(req, res) {
       deliveryAddress,
     })
 
-    res.status(201).json({
+    
+    const user = await User.findById(
+      req.user.id
+    ).select('name email')
+
+   
+
+    let emailSent = false
+
+    if (user) {
+      try {
+       
+
+        await sendOrderConfirmationEmail({
+          to: user.email,
+          customerName: user.name,
+          order,
+        })
+
+        emailSent = true
+
+        
+      } catch (emailError) {
+        console.error(
+          'ORDER EMAIL FAILED:',
+          emailError.message
+        )
+      }
+    }
+
+    const response = {
       message: 'Order created successfully',
       order,
-    })
+      emailSent,
+    }
+
+    
+
+    return res.status(201).json(response)
   } catch (error) {
-    res.status(400).json({
+    console.error(
+      'CREATE ORDER ERROR:',
+      error.message
+    )
+
+    return res.status(400).json({
       message: 'Failed to create order',
       error: error.message,
     })
@@ -71,7 +178,9 @@ async function getMyOrders(req, res) {
   try {
     const orders = await Order.find({
       userId: req.user.id,
-    }).sort({ createdAt: -1 })
+    }).sort({
+      createdAt: -1,
+    })
 
     res.json(orders)
   } catch (error) {

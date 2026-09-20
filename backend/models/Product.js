@@ -26,9 +26,14 @@ const productSchema = new mongoose.Schema(
       trim: true,
     },
 
-    emoji: {
+    image: {
       type: String,
-      default: '🛒',
+      required: true,
+    },
+
+    isActive: {
+      type: Boolean,
+      default: true,
     },
   },
   {

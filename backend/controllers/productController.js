@@ -2,21 +2,25 @@ const Product = require('../models/Product')
 
 async function getProducts(req, res) {
   try {
-    const { search, category } = req.query
+   const { search, category } = req.query
 
-    const filter = {}
-
-    if (search) {
+const filter = {
+  isActive: true,
+}
+  if (search) {
       filter.name = {
         $regex: search,
         $options: 'i',
       }
     }
 
-    if (category && category !== 'All') {
-      filter.category = category
-    }
-
+    if (
+  category &&
+  category !== 'All' &&
+  category !== 'All Categories'
+) {
+  filter.category = category
+}
     const products = await Product.find(filter)
 
     res.json(products)

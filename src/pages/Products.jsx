@@ -1,40 +1,129 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useCart } from '../CartContext'
 
-const products = [
-  { id: 1, name: 'Fresh Tomatoes', category: 'Vegetables', price: 40, unit: '1 kg', emoji: '🍅' },
-  { id: 2, name: 'Potatoes', category: 'Vegetables', price: 35, unit: '1 kg', emoji: '🥔' },
-  { id: 3, name: 'Apples', category: 'Fruits', price: 120, unit: '1 kg', emoji: '🍎' },
-  { id: 4, name: 'Bananas', category: 'Fruits', price: 60, unit: '1 dozen', emoji: '🍌' },
-  { id: 5, name: 'Fresh Milk', category: 'Dairy', price: 32, unit: '500 ml', emoji: '🥛' },
-  { id: 6, name: 'Bread', category: 'Bakery', price: 45, unit: '1 pack', emoji: '🍞' },
-]
+import fruitsVegetables from '../assets/categories/fruits-vegetables.jpg'
+import dairyEggs from '../assets/categories/dairy-eggs.jpg'
+import grainsStaples from '../assets/categories/grains-staples.jpg'
+import snacksBeverages from '../assets/categories/snacks-beverages.jpg'
+import household from '../assets/categories/household.jpg'
+import personalCare from '../assets/categories/personal-care.jpg'
 
 function Products() {
-    const { addToCart } = useCart()
+  const { addToCart } = useCart()
+
+  const [searchParams, setSearchParams] = useSearchParams()
+
+  const categoryFromUrl =
+    searchParams.get('category') || 'All'
+
+  const [products, setProducts] = useState([])
   const [search, setSearch] = useState('')
-  const [category, setCategory] = useState('All')
+  const [category, setCategory] = useState(categoryFromUrl)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [addedProductId, setAddedProductId] = useState(null)
 
-  const filteredProducts = products.filter((product) => {
-    const matchesSearch = product.name
-      .toLowerCase()
-      .includes(search.toLowerCase())
+  useEffect(() => {
+    setCategory(categoryFromUrl)
+  }, [categoryFromUrl])
 
-    const matchesCategory =
-      category === 'All' || product.category === category
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      async function fetchProducts() {
+        try {
+          setLoading(true)
+          setError('')
 
-    return matchesSearch && matchesCategory
-  })
+          const params = new URLSearchParams()
+
+          if (search.trim()) {
+            params.append('search', search.trim())
+          }
+
+          if (category !== 'All') {
+            params.append('category', category)
+          }
+
+          const queryString = params.toString()
+
+          const response = await fetch(
+            `http://localhost:5000/api/products${
+              queryString ? `?${queryString}` : ''
+            }`
+          )
+
+          if (!response.ok) {
+            throw new Error('Failed to fetch products')
+          }
+
+          const data = await response.json()
+
+          setProducts(data)
+        } catch (error) {
+          setError(
+            'Unable to load products right now. Please try again.'
+          )
+        } finally {
+          setLoading(false)
+        }
+      }
+
+      fetchProducts()
+    }, 400)
+
+    return () => clearTimeout(timer)
+  }, [search, category])
+
+  function handleCategoryChange(event) {
+    const selectedCategory = event.target.value
+
+    setCategory(selectedCategory)
+
+    const newParams = new URLSearchParams(searchParams)
+
+    if (selectedCategory === 'All') {
+      newParams.delete('category')
+    } else {
+      newParams.set('category', selectedCategory)
+    }
+
+    setSearchParams(newParams)
+  }
+
+  function handleAddToCart(product) {
+    addToCart({
+      ...product,
+      id: product._id,
+    })
+
+    setAddedProductId(product._id)
+
+    setTimeout(() => {
+      setAddedProductId(null)
+    }, 1200)
+  }
 
   return (
     <main className="products-page">
+
+      {/* HEADER */}
       <section className="products-header">
-        <p className="small-title">LOCALGROCER STORE</p>
+        <p className="section-eyebrow">
+          LOCALGROCER STORE
+        </p>
+
         <h1>Fresh groceries for your home</h1>
-        <p>Choose from everyday essentials available in your neighbourhood.</p>
+
+        <p>
+          Choose from everyday essentials available
+          in your neighbourhood.
+        </p>
       </section>
 
+      {/* SEARCH + FILTER */}
       <section className="product-controls">
+
         <input
           type="text"
           placeholder="Search groceries..."
@@ -44,44 +133,125 @@ function Products() {
 
         <select
           value={category}
-          onChange={(event) => setCategory(event.target.value)}
+          onChange={handleCategoryChange}
         >
           <option value="All">All Categories</option>
-          <option value="Vegetables">Vegetables</option>
-          <option value="Fruits">Fruits</option>
-          <option value="Dairy">Dairy</option>
-          <option value="Bakery">Bakery</option>
+          <option value="Fruits & Vegetables">
+            Fruits & Vegetables
+          </option>
+          <option value="Dairy & Eggs">
+            Dairy & Eggs
+          </option>
+          <option value="Grains & Staples">
+            Grains & Staples
+          </option>
+          <option value="Snacks & Beverages">
+            Snacks & Beverages
+          </option>
+          <option value="Household">
+            Household
+          </option>
+          <option value="Personal Care">
+            Personal Care
+          </option>
         </select>
+
       </section>
 
-      <section className="product-grid">
-        {filteredProducts.map((product) => (
-          <article className="product-card" key={product.id}>
-            <div className="product-image">
-              {product.emoji}
-            </div>
+      {/* LOADING */}
+      {loading && (
+        <p className="no-products">
+          Loading fresh products...
+        </p>
+      )}
 
-            <div className="product-info">
-              <p className="product-category">{product.category}</p>
-              <h2>{product.name}</h2>
-              <p>{product.unit}</p>
+      {/* ERROR */}
+      {!loading && error && (
+        <p className="no-products">
+          {error}
+        </p>
+      )}
 
-              <div className="product-bottom">
-                <strong>₹{product.price}</strong>
-                <button onClick={() => addToCart(product)}>
-                   Add to Cart
-                </button>
+      {/* PRODUCTS */}
+      {!loading && !error && products.length > 0 && (
+        <section className="product-grid">
+
+          {products.map((product) => (
+            <article
+              className="product-card"
+              key={product._id}
+            >
+
+              <div className="product-image">
+  <img
+    src={product.image}
+    alt={product.name}
+    onError={(event) => {
+      const fallbackImages = {
+        'Fruits & Vegetables': fruitsVegetables,
+        'Dairy & Eggs': dairyEggs,
+        'Grains & Staples': grainsStaples,
+        'Snacks & Beverages': snacksBeverages,
+        Household: household,
+        'Personal Care': personalCare,
+      }
+
+      event.currentTarget.src =
+        fallbackImages[product.category] ||
+        fruitsVegetables
+    }}
+  />
+</div>
+
+              <div className="product-info">
+
+                <p className="product-category">
+                  {product.category}
+                </p>
+
+                <h2>{product.name}</h2>
+
+                <p>{product.unit}</p>
+
+                <div className="product-bottom">
+
+                  <strong>
+                    ₹{product.price}
+                  </strong>
+
+                  <button
+                    type="button"
+                    className={
+                      addedProductId === product._id
+                        ? 'product-add-button is-added'
+                        : 'product-add-button'
+                    }
+                    onClick={() =>
+                      handleAddToCart(product)
+                    }
+                  >
+                    {addedProductId === product._id
+                      ? '✓ Added'
+                      : '🛒 Add to Cart'}
+                  </button>
+
+                </div>
+
               </div>
-            </div>
-          </article>
-        ))}
-      </section>
 
-      {filteredProducts.length === 0 && (
+            </article>
+          ))}
+
+        </section>
+      )}
+
+      {/* EMPTY STATE */}
+      {!loading && !error && products.length === 0 && (
         <p className="no-products">
           No products found. Try another search.
         </p>
       )}
+
     </main>
   )
 }
