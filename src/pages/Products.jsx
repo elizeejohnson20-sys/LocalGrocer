@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useCart } from '../CartContext'
+import { API_URL } from '../api'
 
 import fruitsVegetables from '../assets/categories/fruits-vegetables.jpg'
 import dairyEggs from '../assets/categories/dairy-eggs.jpg'
@@ -46,12 +47,11 @@ function Products() {
           }
 
           const queryString = params.toString()
-
           const response = await fetch(
-            `http://localhost:5000/api/products${
-              queryString ? `?${queryString}` : ''
-            }`
-          )
+  `${API_URL}/api/products${
+    queryString ? `?${queryString}` : ''
+  }`
+)
 
           if (!response.ok) {
             throw new Error('Failed to fetch products')

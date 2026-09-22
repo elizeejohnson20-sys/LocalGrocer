@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useCart } from '../CartContext'
+import { API_URL } from '../api'
 
 function Checkout() {
   const navigate = useNavigate()
@@ -106,7 +107,7 @@ function Checkout() {
       }))
 
       const response = await fetch(
-        'http://localhost:5000/api/orders',
+  `${API_URL}/api/orders`,
         {
           method: 'POST',
 
@@ -130,7 +131,6 @@ function Checkout() {
       )
 
       const data = await response.json()
-      console.log('ORDER API RESPONSE:', data)
 
       if (!response.ok) {
         throw new Error(
