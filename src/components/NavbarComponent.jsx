@@ -1,10 +1,24 @@
 import { useEffect, useState } from 'react'
-import { NavLink, Link } from 'react-router-dom'
+import {
+  NavLink,
+  Link,
+  useLocation,
+  useNavigate,
+} from 'react-router-dom'
 import { useCart } from '../CartContext'
 
 function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [user, setUser] = useState(null)
+  const navigate = useNavigate()
+const location = useLocation()
+
+const [searchTerm, setSearchTerm] = useState(() => {
+  return (
+    new URLSearchParams(location.search).get('search') ||
+    ''
+  )
+})
 
   const { cart } = useCart()
 
@@ -41,6 +55,42 @@ function Navbar() {
     }
   }, [])
 
+  useEffect(() => {
+  const timer = setTimeout(() => {
+    const trimmedSearch = searchTerm.trim()
+    const currentSearch =
+      new URLSearchParams(location.search).get('search') ||
+      ''
+
+    if (
+      trimmedSearch &&
+      (
+        location.pathname !== '/products' ||
+        currentSearch !== trimmedSearch
+      )
+    ) {
+      navigate(
+        `/products?search=${encodeURIComponent(trimmedSearch)}`
+      )
+      return
+    }
+
+    if (
+      !trimmedSearch &&
+      location.pathname === '/products' &&
+      currentSearch
+    ) {
+      navigate('/products')
+    }
+  }, 400)
+
+  return () => clearTimeout(timer)
+}, [
+  searchTerm,
+  location.pathname,
+  location.search,
+  navigate,
+])
   function closeMenu() {
     setMenuOpen(false)
   }
@@ -89,15 +139,20 @@ function Navbar() {
         </Link>
 
         <div className="navbar-search">
-          <span className="search-icon">
-            ⌕
-          </span>
+  <span className="search-icon">
+    ⌕
+  </span>
 
-          <input
-            type="text"
-            placeholder="Search for products, categories..."
-          />
-        </div>
+  <input
+    type="search"
+    value={searchTerm}
+    onChange={(event) =>
+      setSearchTerm(event.target.value)
+    }
+    placeholder="Search for products, categories..."
+    aria-label="Search for products"
+  />
+</div>
 
         <nav className="desktop-nav">
 

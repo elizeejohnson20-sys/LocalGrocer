@@ -18,8 +18,13 @@ function Products() {
   const categoryFromUrl =
     searchParams.get('category') || 'All'
 
-  const [products, setProducts] = useState([])
-  const [search, setSearch] = useState('')
+  const searchFromUrl =
+  searchParams.get('search') || ''
+
+const [products, setProducts] = useState([])
+
+const [search, setSearch] =
+  useState(searchFromUrl)
   const [category, setCategory] = useState(categoryFromUrl)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -28,6 +33,10 @@ function Products() {
   useEffect(() => {
     setCategory(categoryFromUrl)
   }, [categoryFromUrl])
+
+  useEffect(() => {
+  setSearch(searchFromUrl)
+}, [searchFromUrl])
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -125,11 +134,25 @@ function Products() {
       <section className="product-controls">
 
         <input
-          type="text"
-          placeholder="Search groceries..."
-          value={search}
-          onChange={(event) => setSearch(event.target.value)}
-        />
+  type="search"
+  placeholder="Search groceries..."
+  value={search}
+  onChange={(event) => {
+    const value = event.target.value
+    setSearch(value)
+
+    const newParams =
+      new URLSearchParams(searchParams)
+
+    if (value.trim()) {
+      newParams.set('search', value.trim())
+    } else {
+      newParams.delete('search')
+    }
+
+    setSearchParams(newParams)
+  }}
+/>
 
         <select
           value={category}

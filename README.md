@@ -1,33 +1,43 @@
 # LocalGrocer
 
-LocalGrocer is a responsive neighbourhood grocery ordering web application built with React and Node.js.
+A responsive neighbourhood grocery ordering web application built with **React, Node.js, Express, and MongoDB**.
 
-It allows customers to browse grocery products, search and filter products, manage a persistent shopping cart, register and log in securely, complete checkout, place orders, view order history, and receive order confirmation emails.
+Customers can browse grocery products, search and filter products, manage their cart, register and log in, complete checkout, place orders, view order history, and receive order confirmation emails.
+
+## Live Application
+
+**Frontend:** https://local-grocer.vercel.app
+
+**Backend API:** https://localgrocer-api.onrender.com
+
+**Database:** MongoDB Atlas
 
 ## Features
 
-* Product listing with real product images
+* Responsive grocery shopping interface
 * Product search with debounce
-* Category filtering
+* Category-based product filtering
 * Shop-by-category navigation
-* Shopping cart with quantity controls
-* Cart persistence using localStorage
+* Product-specific images
+* Add, remove, and update cart quantities
+* Cart persistence using `localStorage`
 * User registration and login
-* JWT-based authentication
-* Password hashing with bcryptjs
+* JWT authentication
+* Password hashing with `bcryptjs`
+* Protected routes
 * Role-based access control
-* Admin-protected product creation
-* Protected order APIs
-* Order creation with MongoDB persistence
-* Server-side checkout validation
-* Order history
-* Delivery address handling
+* Checkout form with validation
+* Server-side order validation
+* MongoDB order persistence
 * Order confirmation page
-* Order confirmation email using Nodemailer and Mailtrap SMTP
-* Responsive mobile-friendly interface
-* Automated API tests
+* My Orders history
+* Order confirmation email using Nodemailer
+* Mobile-responsive design
+* Error and empty states
 
-## Tech Stack
+> Payment gateway integration is outside the scope of this project.
+
+## Technology Stack
 
 ### Frontend
 
@@ -43,12 +53,12 @@ It allows customers to browse grocery products, search and filter products, mana
 * Express.js
 * MongoDB
 * Mongoose
+* REST API
 * JWT
 * bcryptjs
 * Nodemailer
-* REST API
 
-### Testing and Development
+### Testing & Tools
 
 * Node.js Test Runner
 * Supertest
@@ -56,6 +66,13 @@ It allows customers to browse grocery products, search and filter products, mana
 * Git
 * GitHub
 * VS Code
+
+### Deployment
+
+* **Vercel** — Frontend
+* **Render** — Backend
+* **MongoDB Atlas** — Database
+* **Mailtrap** — Email testing
 
 ## Project Structure
 
@@ -98,107 +115,77 @@ LocalGrocer/
 │
 ├── src/
 │   ├── assets/
+│   │   ├── categories/
+│   │   └── hero-groceries.jpg
+│   │
 │   ├── components/
+│   │   ├── FeaturedProducts.jsx
+│   │   ├── NavbarComponent.jsx
+│   │   └── ProtectedRoute.jsx
+│   │
 │   ├── pages/
+│   │   ├── Cart.jsx
+│   │   ├── Checkout.jsx
+│   │   ├── Home.jsx
+│   │   ├── Login.jsx
+│   │   ├── MyOrders.jsx
+│   │   ├── OrderConfirmation.jsx
+│   │   ├── Products.jsx
+│   │   └── Register.jsx
+│   │
+│   ├── api.js
 │   ├── CartContext.jsx
 │   ├── app.jsx
 │   ├── main.jsx
 │   └── style.css
 │
+├── public/
+├── .env.example
 ├── .gitignore
 ├── index.html
 ├── package.json
+├── package-lock.json
+├── vercel.json
 └── vite.config.js
 ```
 
-## Local Setup
+## Product Categories
 
-### 1. Clone the repository
+The current catalogue contains:
 
-```bash
-git clone https://github.com/elizeejohnson20-sys/LocalGrocer.git
-cd LocalGrocer
-```
+1. Fruits & Vegetables
+2. Dairy & Eggs
+3. Grains & Staples
+4. Snacks & Beverages
+5. Household
+6. Personal Care
 
-### 2. Install frontend dependencies
+There are **30 active products** in the current customer catalogue.
 
-```bash
-npm install
-```
-
-### 3. Install backend dependencies
-
-```bash
-cd backend
-npm install
-```
-
-### 4. Configure environment variables
-
-Create:
+## Application Flow
 
 ```text
-backend/.env
-```
-
-Use `backend/.env.example` as the template.
-
-Example:
-
-```env
-PORT=5000
-MONGODB_URI=mongodb://127.0.0.1:27017/localgrocer
-JWT_SECRET=your_jwt_secret_here
-MAILTRAP_HOST=sandbox.smtp.mailtrap.io
-MAILTRAP_PORT=2525
-MAILTRAP_USER=your_mailtrap_username
-MAILTRAP_PASS=your_mailtrap_password
-MAIL_FROM=LocalGrocer <hello@localgrocer.test>
-CLIENT_URL=http://localhost:5173
-```
-
-Do not commit the real `.env` file.
-
-### 5. Start MongoDB
-
-Make sure MongoDB is running locally.
-
-### 6. Seed the product catalogue
-
-From the `backend` directory:
-
-```bash
-node seedProducts.js
-```
-
-The seed creates or updates the LocalGrocer product catalogue.
-
-### 7. Start the backend
-
-From `backend`:
-
-```bash
-node server.js
-```
-
-Backend:
-
-```text
-http://localhost:5000
-```
-
-### 8. Start the frontend
-
-Open a second terminal in the project root:
-
-```bash
-npm run dev
-```
-
-Frontend:
-
-```text
-http://localhost:5173
+Browse Products
+      ↓
+Search / Filter
+      ↓
+Add to Cart
+      ↓
+Cart Persistence
+      ↓
+Login / Register
+      ↓
+Checkout
+      ↓
+Validation
+      ↓
+Create Order
+      ↓
+MongoDB Atlas
+      ↓
+Order Confirmation
+      ↓
+Email Confirmation
 ```
 
 ## API Endpoints
@@ -210,14 +197,15 @@ GET  /api/products
 POST /api/products
 ```
 
-`GET /api/products` supports:
+Examples:
 
 ```text
-?search=
-?category=
+GET /api/products?search=milk
+
+GET /api/products?category=Dairy%20%26%20Eggs
 ```
 
-Product creation requires an authenticated admin user.
+Product creation is protected for admin users.
 
 ### Authentication
 
@@ -236,92 +224,219 @@ GET  /api/orders
 GET  /api/orders/:id
 ```
 
-Order endpoints require JWT authentication.
+Order routes require JWT authentication.
+
+## Local Setup
+
+### Prerequisites
+
+* Node.js
+* npm
+* MongoDB Community Server
+* Git
+
+### Clone the repository
+
+```bash
+git clone https://github.com/elizeejohnson20-sys/LocalGrocer.git
+cd LocalGrocer
+```
+
+### Install frontend dependencies
+
+```bash
+npm install
+```
+
+### Install backend dependencies
+
+```bash
+cd backend
+npm install
+```
+
+### Configure environment variables
+
+Create the required environment files using:
+
+```text
+.env.example
+backend/.env.example
+```
+
+Never commit real credentials or `.env` files.
+
+### Seed products
+
+From the `backend` directory:
+
+```bash
+node seedProducts.js
+```
+
+### Start the backend
+
+```bash
+node server.js
+```
+
+Backend:
+
+```text
+http://localhost:5000
+```
+
+### Start the frontend
+
+Open another terminal in the project root:
+
+```bash
+npm run dev
+```
+
+Frontend:
+
+```text
+http://localhost:5173
+```
+
+## Environment Variables
+
+### Frontend
+
+```env
+VITE_API_URL=http://localhost:5000
+```
+
+Production:
+
+```env
+VITE_API_URL=https://localgrocer-api.onrender.com
+```
+
+### Backend
+
+The backend uses:
+
+```text
+PORT
+MONGODB_URI
+JWT_SECRET
+MAILTRAP_HOST
+MAILTRAP_PORT
+MAILTRAP_USER
+MAILTRAP_PASS
+MAIL_FROM
+CLIENT_URL
+```
+
+Production secrets are configured through Render environment variables and are not stored in GitHub.
 
 ## Security
 
-The backend includes:
+The application includes:
 
 * JWT authentication
-* bcryptjs password hashing
+* Password hashing with bcryptjs
+* Protected routes
 * Role-based access control
-* Protected product creation
-* Protected order routes
-* Server-side order validation
-* Active-product checks before order creation
+* Admin-protected product creation
+* Server-side checkout validation
+* Active-product validation
+* Server-side product pricing
+* CORS restrictions
 * Environment variables for secrets
-* CORS origin restrictions
-* HTML escaping in confirmation emails
+* HTML escaping in email content
 
 ## Testing
 
-Backend API tests use the Node.js built-in test runner and Supertest.
-
-From the backend directory:
+Backend tests can be run from the `backend` directory:
 
 ```bash
 npm test
 ```
 
-The current test suite covers:
+Current automated coverage includes:
 
 * `GET /api/products`
 * Admin-authorized `POST /api/products`
 
-## Product Catalogue
+The application was also tested manually for:
 
-The application currently contains six product categories:
+* Registration and login
+* Product search
+* Category filtering
+* Cart persistence
+* Checkout validation
+* Order creation
+* Order confirmation
+* Order history
+* Confirmation email
+* Responsive layouts
 
-* Fruits & Vegetables
-* Dairy & Eggs
-* Grains & Staples
-* Snacks & Beverages
-* Household
-* Personal Care
+## Deployment
 
-The catalogue contains 30 active products for the current shop experience.
-
-## Order Flow
+### Frontend — Vercel
 
 ```text
-Browse Products
-      ↓
-Search / Filter
-      ↓
-Add to Cart
-      ↓
-Cart Persistence
-      ↓
-Login / Register
-      ↓
-Checkout
-      ↓
-Server-side Validation
-      ↓
-MongoDB Order
-      ↓
-Order Confirmation
-      ↓
-Email Confirmation via Mailtrap
+https://local-grocer.vercel.app
 ```
 
-## Current Project Status
+The Vercel deployment uses the Vite frontend from the repository root.
 
-* Frontend UI implemented
-* Product search and filtering implemented
-* Category navigation implemented
-* Cart implemented with localStorage persistence
+### Backend — Render
+
+```text
+https://localgrocer-api.onrender.com
+```
+
+The Render service uses the `backend` directory as its root directory.
+
+### Database — MongoDB Atlas
+
+The LocalGrocer database is hosted on MongoDB Atlas.
+
+The existing local database was migrated to Atlas while preserving:
+
+```text
+products
+users
+orders
+```
+
+## Deployment Architecture
+
+```text
+GitHub
+  │
+  ├── Vercel
+  │     └── React + Vite Frontend
+  │
+  └── Render
+        └── Node.js + Express Backend
+                  │
+                  ▼
+             MongoDB Atlas
+                  │
+                  ▼
+            Nodemailer / SMTP
+```
+
+## Project Status
+
+* Frontend deployed
+* Backend deployed
+* MongoDB Atlas connected
+* REST API integrated
 * Authentication implemented
-* Backend REST APIs implemented
-* MongoDB persistence implemented
-* Order creation implemented
-* Order history implemented
+* Cart persistence implemented
+* Checkout and order flow implemented
 * Email confirmation implemented
-* API tests passing
-* Production frontend build verified
+* Backend tests implemented
+* Responsive interface implemented
 
-## Notes
+## Internship Project
 
-This project is developed as part of a Full Stack Development internship project for Cynaris Solutions Pvt Ltd.
+LocalGrocer was developed as part of a **Full Stack Development internship project at Cynaris Solutions Pvt Ltd**.
 
-The application uses MongoDB according to the LocalGrocer project brief.
+The project follows the LocalGrocer application brief and demonstrates frontend development, REST API integration, authentication, database persistence, email integration, testing, and cloud deployment.

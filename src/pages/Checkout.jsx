@@ -82,21 +82,60 @@ function Checkout() {
       return
     }
 
-    if (!/^\d{10}$/.test(formData.phone.trim())) {
-      setError(
-        'Please enter a valid 10-digit phone number.'
-      )
+    const cleanFullName = formData.fullName.trim()
+const cleanPhone = formData.phone.trim()
+const cleanAddress = formData.address.trim()
+const cleanCity = formData.city.trim()
+const cleanPincode = formData.pincode.trim()
 
-      return
-    }
+if (
+  !/^[A-Za-z][A-Za-z .'-]{1,59}$/.test(
+    cleanFullName
+  )
+) {
+  setError(
+    'Please enter a valid full name using letters only.'
+  )
 
-    if (!/^\d{6}$/.test(formData.pincode.trim())) {
-      setError(
-        'Please enter a valid 6-digit pincode.'
-      )
+  return
+}
 
-      return
-    }
+if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
+  setError(
+    'Please enter a valid 10-digit Indian mobile number.'
+  )
+
+  return
+}
+
+if (
+  cleanAddress.length < 15 ||
+  cleanAddress.split(/\s+/).filter(Boolean).length < 3
+) {
+  setError(
+    'Please enter a more complete delivery address.'
+  )
+
+  return
+}
+
+if (
+  !/^[A-Za-z][A-Za-z .'-]{1,39}$/.test(cleanCity)
+) {
+  setError(
+    'Please enter a valid city name.'
+  )
+
+  return
+}
+
+if (!/^[1-9]\d{5}$/.test(cleanPincode)) {
+  setError(
+    'Please enter a valid 6-digit pincode.'
+  )
+
+  return
+}
 
     setLoading(true)
 
@@ -119,13 +158,13 @@ function Checkout() {
           body: JSON.stringify({
             items: orderItems,
 
-            deliveryAddress: {
-              fullName: formData.fullName.trim(),
-              phone: formData.phone.trim(),
-              address: formData.address.trim(),
-              city: formData.city.trim(),
-              pincode: formData.pincode.trim(),
-            },
+           deliveryAddress: {
+  fullName: cleanFullName,
+  phone: cleanPhone,
+  address: cleanAddress,
+  city: cleanCity,
+  pincode: cleanPincode,
+},
           }),
         }
       )
@@ -245,7 +284,9 @@ function Checkout() {
                 value={formData.phone}
                 onChange={handleChange}
                 placeholder="10-digit mobile number"
-                maxLength="10"
+                maxLength={10}
+inputMode="numeric"
+pattern="[6-9][0-9]{9}"
                 autoComplete="tel"
               />
             </label>
@@ -285,8 +326,9 @@ function Checkout() {
                 value={formData.pincode}
                 onChange={handleChange}
                 placeholder="6-digit pincode"
-                maxLength="6"
-                inputMode="numeric"
+                maxLength={6}
+inputMode="numeric"
+pattern="[1-9][0-9]{5}"
                 autoComplete="postal-code"
               />
             </label>
