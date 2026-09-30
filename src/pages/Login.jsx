@@ -1,10 +1,10 @@
 import { useState } from 'react'
-import { API_URL } from '../api'
 import {
   Link,
   useLocation,
   useNavigate,
 } from 'react-router-dom'
+import { API_URL } from '../api'
 
 function Login() {
   const navigate = useNavigate()
@@ -66,7 +66,10 @@ function Login() {
         replace: true,
       })
     } catch (error) {
-      setError(error.message)
+      setError(
+        error.message ||
+        'Unable to login right now.'
+      )
     } finally {
       setLoading(false)
     }
@@ -109,6 +112,7 @@ function Login() {
                 setEmail(event.target.value)
               }
               placeholder="Enter your email"
+              autoComplete="email"
               required
             />
           </label>
@@ -123,6 +127,7 @@ function Login() {
                 setPassword(event.target.value)
               }
               placeholder="Enter your password"
+              autoComplete="current-password"
               required
             />
           </label>
@@ -147,6 +152,7 @@ function Login() {
 
         <p className="auth-switch">
           Don't have an account?{' '}
+
           <Link to="/register">
             Create one
           </Link>

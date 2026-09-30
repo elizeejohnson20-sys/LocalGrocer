@@ -3,12 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import { useCart } from '../CartContext'
 import { API_URL } from '../api'
 
-import fruitsVegetables from '../assets/categories/fruits-vegetables.jpg'
-import dairyEggs from '../assets/categories/dairy-eggs.jpg'
-import grainsStaples from '../assets/categories/grains-staples.jpg'
-import snacksBeverages from '../assets/categories/snacks-beverages.jpg'
-import household from '../assets/categories/household.jpg'
-import personalCare from '../assets/categories/personal-care.jpg'
+
 
 function Products() {
   const { addToCart } = useCart()
@@ -209,20 +204,6 @@ const [search, setSearch] =
   <img
     src={product.image}
     alt={product.name}
-    onError={(event) => {
-      const fallbackImages = {
-        'Fruits & Vegetables': fruitsVegetables,
-        'Dairy & Eggs': dairyEggs,
-        'Grains & Staples': grainsStaples,
-        'Snacks & Beverages': snacksBeverages,
-        Household: household,
-        'Personal Care': personalCare,
-      }
-
-      event.currentTarget.src =
-        fallbackImages[product.category] ||
-        fruitsVegetables
-    }}
   />
 </div>
 

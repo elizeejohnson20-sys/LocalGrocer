@@ -211,8 +211,8 @@ const products = [
     price: 90,
     unit: '30 bags',
     image:
-    'https://m.media-amazon.com/images/I/71pY2p0eJwL._AC_SL1500_.jpg',
-  },
+    '/products/garbage-bags.jpg',
+    },
 
   // PERSONAL CARE
   {

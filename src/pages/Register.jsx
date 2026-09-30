@@ -1,5 +1,8 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import {
+  Link,
+  useNavigate,
+} from 'react-router-dom'
 import { API_URL } from '../api'
 
 function Register() {
@@ -8,7 +11,8 @@ function Register() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] =
+    useState('')
 
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -24,7 +28,9 @@ function Register() {
     }
 
     if (password.length < 6) {
-      setError('Password must be at least 6 characters')
+      setError(
+        'Password must be at least 6 characters'
+      )
       return
     }
 
@@ -56,7 +62,10 @@ function Register() {
 
       navigate('/login')
     } catch (error) {
-      setError(error.message)
+      setError(
+        error.message ||
+        'Unable to create account right now.'
+      )
     } finally {
       setLoading(false)
     }
@@ -68,6 +77,7 @@ function Register() {
       <section className="auth-card">
 
         <div className="auth-header">
+
           <p className="section-eyebrow">
             JOIN LOCALGROCER
           </p>
@@ -80,6 +90,7 @@ function Register() {
             Sign up and start shopping your everyday
             groceries online.
           </p>
+
         </div>
 
         <form
@@ -89,6 +100,7 @@ function Register() {
 
           <label>
             Full Name
+
             <input
               type="text"
               value={name}
@@ -96,12 +108,14 @@ function Register() {
                 setName(event.target.value)
               }
               placeholder="Enter your name"
+              autoComplete="name"
               required
             />
           </label>
 
           <label>
             Email
+
             <input
               type="email"
               value={email}
@@ -109,12 +123,14 @@ function Register() {
                 setEmail(event.target.value)
               }
               placeholder="Enter your email"
+              autoComplete="email"
               required
             />
           </label>
 
           <label>
             Password
+
             <input
               type="password"
               value={password}
@@ -122,12 +138,14 @@ function Register() {
                 setPassword(event.target.value)
               }
               placeholder="At least 6 characters"
+              autoComplete="new-password"
               required
             />
           </label>
 
           <label>
             Confirm Password
+
             <input
               type="password"
               value={confirmPassword}
@@ -135,6 +153,7 @@ function Register() {
                 setConfirmPassword(event.target.value)
               }
               placeholder="Re-enter your password"
+              autoComplete="new-password"
               required
             />
           </label>
@@ -159,6 +178,7 @@ function Register() {
 
         <p className="auth-switch">
           Already have an account?{' '}
+
           <Link to="/login">
             Login
           </Link>
