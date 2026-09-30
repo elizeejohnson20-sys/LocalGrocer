@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useCart } from '../CartContext'
 import { API_URL } from '../api'
+import garbageBags from '../assets/categories/garbage-bags.jpg'
 
 function FeaturedProducts() {
   const [products, setProducts] = useState([])
@@ -133,9 +134,14 @@ function FeaturedProducts() {
             <div className="featured-product-image">
 
               <img
-                src={product.image}
-                alt={product.name}
-              />
+  src={product.image}
+  alt={product.name}
+  onError={(event) => {
+    if (product.name === 'Garbage Bags') {
+      event.currentTarget.src = garbageBags
+    }
+  }}
+/>
 
               <button
                 className="wishlist-button"
